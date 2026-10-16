@@ -50,6 +50,10 @@ Preparing injects the selected synthetic fault and requests a diagnosis. It does
 
 The exhibition deployment is scheduled for deletion on **December 1, 2026 at 20:00 JST**, with a retry on December 2. After that, use recorded mode. The cost target is $5; alarms and counters reduce exposure but are not an exact billing cap.
 
+## Conversation history
+
+**New chat** creates a conversation; **Threads** selects an earlier one. **Select** enables multiple selection, and **Delete selected** shows the names and count before deletion. Cancel keeps every message. Conversations persist in this browser's local storage, not across devices. Deleting a conversation removes its browser copy; it does not delete AWS audit evidence. The original recorded demonstration is seeded once, and is not re-imported after you delete it. Repair confirmation and run selection are bound to the conversation on the local server. After restarting that server, start a fresh lab for further writes.
+
 ## What is real, and what is modelled
 
 - **Real in live mode:** MCP requests, Lambda workers, DynamoDB state changes, Nova diagnosis/reporting, functional probes and KMS verification.
@@ -81,21 +85,21 @@ The seven Lambda functions have separate roles. Two DynamoDB tables separate wor
 ```powershell
 $env:PYTHONPATH='.;source'
 python -m pytest tests_cloud tests_alexa -q
-python tools/verify_containment_evidence.py C:/private/CONTAINMENT_VALIDATION.json
+python tools/verify_containment_evidence.py C:/private/CONTAINMENT_VALIDATION.json C:/private/CONTAINMENT_VALIDATION.json C:/private/CONTAINMENT_VALIDATION.json
 # With the local simulator running:
 python alexa_sim/verify_interop.py
 ```
 
-- **156 local tests passed:** 133 backend tests and 23 simulator boundary tests.
+- **167 local tests passed:** 133 backend tests and 34 simulator boundary and conversation tests.
 - **Six AWS acceptance cases:** five containment cases and one recovery regression, 25 functional checks each. Six exported signatures verified offline; all six altered payloads were rejected.
 - **One additional MCP-to-AWS run:** 25/25 checks, three unauthorized requests denied, legitimate reads and evidence preserved, KMS signature verified. Two model calls. Its KMS result is the backend verification flag; a separate offline signature export was not collected for this additional run.
 - **MCP interop:** official SDK client, explicit 2025-11-25 negotiation, seven tools, invalid case rejected, unconfirmed repair rejected and untrusted Origin rejected.
 
-See `evidence/aws/` and `evidence/public-tests.xml`. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. These are dated test records, not a guarantee of future AI output.
+See `evidence/aws/` and `evidence/public-tests.xml`. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. These are dated test records, not a guarantee of future AI output.
 
 ## Deployment source
 
-`cloud/` contains runtime, UI and CloudFormation generation. `source/rpp_v15/` and `source/rpp_v16/` contain the pure reference policy/planner used here. `tools/build_cloud.py` creates packages locally without contacting AWS. Deployment tools stage changes as prepare → review → execute; they are administrator utilities, not necessary for judging. The template contains the exhibition's fixed names, region and cleanup dates. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Review those before adapting it to another account. Do not run an old dated template as a general-purpose production deployment.
+`cloud/` contains runtime, UI and CloudFormation generation. `source/rpp_v15/` and `source/rpp_v16/` contain the pure reference policy/planner used here. `tools/build_cloud.py` creates packages locally without contacting AWS. Deployment tools stage changes as prepare → review → execute; they are administrator utilities, not necessary for judging. The template contains the exhibition's fixed names, region and cleanup dates. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Review those before adapting it to another account. Do not run an old dated template as a general-purpose production deployment.
 
 ## Tradeoffs and next work
 

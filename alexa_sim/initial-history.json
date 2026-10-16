@@ -1,0 +1,195 @@
+{
+  "title": "Member API containment \u00b7 recorded session",
+  "messages": [
+    {
+      "role": "ASSISTANT",
+      "text": "Ask me for the incident status, or start a member API lab. I can prepare a bounded repair and show its evidence.",
+      "time": 1792141567606
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, what is the incident status?",
+      "time": 1792141567606
+    },
+    {
+      "role": "ASSISTANT",
+      "text": "THREAT CONTAINED. 25 of 25 checks pass. This is saved AWS evidence.",
+      "time": 1792141567606
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, start the member API lab.",
+      "time": 1792141567607
+    },
+    {
+      "role": "ASSISTANT",
+      "text": "The member API lab has a healthy baseline. Ask me to prepare a repair to inject the selected fault, preserve its evidence and request a diagnosis.",
+      "time": 1792141567607
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, prepare a repair.",
+      "time": 1792141567607
+    },
+    {
+      "role": "PATCH",
+      "text": "Unauthorized reads are bypassing scoped authentication.\nApproved runbook: ENFORCE_MEMBER_API_SCOPE.\nThe repair has not been applied. Confirm the approved repair to continue.",
+      "time": 1792141567607
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, confirm the approved repair.",
+      "time": 1792141567607
+    },
+    {
+      "role": "LOG",
+      "text": "PATCH performed the completed repair, and I recorded the verified result. Unauthorized lab access was blocked, and 25 passing checks confirmed this is the disposable lab.",
+      "time": 1792141567607
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, what evidence is missing?",
+      "time": 1792141567607
+    },
+    {
+      "role": "ASSISTANT",
+      "text": "The reference model is RECOVERY_ONLY_CANDIDATE. Missing evidence and known failures remain separate. This calculation is read-only; it cannot authorize the live repair.",
+      "time": 1792141567607
+    },
+    {
+      "role": "YOU",
+      "text": "Alexa, plan the next evidence.",
+      "time": 1792141567607
+    },
+    {
+      "role": "ASSISTANT",
+      "text": "The reference planner recommends 2 evidence probes within 6 illustrative units. These are modelling units, not AWS prices. No probe has run.",
+      "time": 1792141567607
+    }
+  ],
+  "run": {
+    "run_id": "run-5806bcb3e88f4340bde67df617bb6280",
+    "scenario": "sourcenext-api",
+    "phase": "COMPLETE",
+    "revision": 9,
+    "mode": "RECORDED AWS EVIDENCE",
+    "checks_passed": 25,
+    "checks_total": 25,
+    "plan": {
+      "diagnosis": "Unauthorized reads are bypassing scoped authentication.",
+      "reason": "The member API failed to deny unauthorized requests, despite legitimate reads.",
+      "runbook": "ENFORCE_MEMBER_API_SCOPE"
+    },
+    "verification": {
+      "checks_passed": 25,
+      "checks_total": 25,
+      "containment": {
+        "attempted": 3,
+        "denied": 3,
+        "legitimate_read": true
+      },
+      "environment_digest": "sha256:fee11bed42b480f1df6e7ee612ed3c0edd66d1b8c0b786decf3e9380b9cfa40b",
+      "evidence_preserved": true,
+      "healthy": true,
+      "independent": true,
+      "kms_signature_verified": true,
+      "verified_at": 1792139624
+    },
+    "dialogue": [
+      {
+        "at": 1792139580,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "PATCH",
+        "text": "The baseline is clean. I am ready to watch the isolated workload."
+      },
+      {
+        "at": 1792139580,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "LOG",
+        "text": "I am recording the evidence and operator decisions. I will report success after independent verification."
+      },
+      {
+        "at": 1792139596,
+        "phase": "ANOMALY",
+        "revision": 1,
+        "speaker": "PATCH",
+        "text": "I detected unauthorized synthetic reads. I am preserving the evidence."
+      },
+      {
+        "at": 1792139599,
+        "phase": "WARNING",
+        "revision": 2,
+        "speaker": "PATCH",
+        "text": "The evidence is preserved. I will choose a scoped containment action."
+      },
+      {
+        "at": 1792139601,
+        "phase": "DIAGNOSING",
+        "revision": 3,
+        "speaker": "PATCH",
+        "text": "I am asking Amazon Nova to select an approved containment runbook."
+      },
+      {
+        "at": 1792139603,
+        "phase": "REPAIR_READY",
+        "revision": 4,
+        "speaker": "PATCH",
+        "text": "Unauthorized reads are bypassing scoped authentication. The member API failed to deny unauthorized requests, despite legitimate reads."
+      },
+      {
+        "at": 1792139611,
+        "phase": "REPAIRING",
+        "revision": 5,
+        "speaker": "PATCH",
+        "text": "I applied the containment policy. The verifier will now replay unauthorized requests."
+      },
+      {
+        "at": 1792139614,
+        "phase": "VERIFYING",
+        "revision": 6,
+        "speaker": "PATCH",
+        "text": "The verifier is testing blocked access, legitimate reads, and evidence integrity."
+      },
+      {
+        "at": 1792139624,
+        "phase": "NORMALIZED",
+        "revision": 7,
+        "speaker": "PATCH",
+        "text": "Containment verified: all 25 checks passed. Previously leaked data is not recovered."
+      },
+      {
+        "at": 1792139626,
+        "phase": "REPORTING",
+        "revision": 8,
+        "speaker": "LOG",
+        "text": "I am composing the verified containment record."
+      },
+      {
+        "at": 1792139628,
+        "phase": "COMPLETE",
+        "revision": 9,
+        "speaker": "LOG",
+        "text": "PATCH performed the completed repair, and I recorded the verified result. Unauthorized lab access was blocked, and 25 passing checks confirmed this is the disposable lab."
+      }
+    ],
+    "report": "PATCH performed the completed repair, and I recorded the verified result. Unauthorized lab access was blocked, and 25 passing checks confirmed this is the disposable lab.",
+    "ai_usage": [
+      {
+        "inputTokens": 930,
+        "model": "amazon.nova-micro-v1:0",
+        "outputTokens": 49,
+        "totalTokens": 979
+      },
+      {
+        "inputTokens": 287,
+        "model": "amazon.nova-micro-v1:0",
+        "outputTokens": 35,
+        "totalTokens": 322
+      }
+    ]
+  },
+  "frontier": "RECOVERY_ONLY_CANDIDATE\n1 action lacks required proof.",
+  "planner": "2 candidate probes \u00b7 6 illustrative units.\nNo probes executed."
+}

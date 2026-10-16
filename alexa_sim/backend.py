@@ -15,6 +15,8 @@ class Lab:
         self.mode=mode or os.getenv('NR_MODE','recorded')
         if self.mode not in {'recorded','aws'}:raise ValueError('Invalid NR_MODE')
         self.recorded=json.loads((ROOT/'evidence/aws/CONTAINMENT_BROWSER_EXPORT.json').read_text(encoding='utf8'))['result']
+        recent=ROOT/'evidence/aws/ALEXA_LIVE_VALIDATION.json'
+        if recent.exists():self.recorded=json.loads(recent.read_text(encoding='utf8'))['result']
         self.latest=self.recorded['run_id']
         self.owned=set();self.pending={};self.lock=threading.RLock()
         self.opener=build_opener(NoRedirect())

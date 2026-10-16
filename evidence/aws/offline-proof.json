@@ -1,7 +1,0 @@
-{
-  "certificate": {
-    "private_attestation_omitted": true,
-    "reason": "Signed body contains deployment identifiers; original is supplied privately."
-  },
-  "public_key_der_base64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIdrKxyzdNz/F49HnmY0ORXsIctiqU3N0LIqrHPhq/SioK59yPg8sU7D5Z0q6Fb7L5M2Fs+3/+CXWlyTfYbFRrw=="
-}

@@ -11,3 +11,16 @@ These notes describe this project's development, not a benchmark of the services
 What I would like next: clearer account readiness diagnostics before the first inference call, a small official end-to-end Alexa+ simulation example with explicit confirmation, and examples that show denial and retry paths alongside successful tool calls.
 
 The current Alexa+ experience is a browser simulation. No actual Alexa account or Echo was connected.
+
+
+## Reproduction detail
+
+| Task and steps | Expected / actual | Severity | Workaround and requested improvement |
+| --- | --- | --- | --- |
+| Call Bedrock Converse for the first deployed diagnosis | Expected a model result; account verification blocked the request | Important | Keep the run blocked and retry after readiness is confirmed. Expose readiness diagnostics before inference. |
+| Submit Nova's containment plan to the target/evidence gate | Expected the selected runbook to match the fault; two proposals did not | Important | Return the specific rejection reason and bound the retry count. Document rejection-path examples alongside success. |
+| Delete a disposable CloudFormation rehearsal stack | Expected deletion to finish; its permission dependency was removed too early | Critical for this exhibition's cleanup | Retain the dedicated cleanup role until stack removal is verified. Document cleanup dependency ordering. |
+| Read an official MCP v2 call_tool result | Expected a structured object; the result could be JSON text, with snake_case client fields | Important | Decode both supported result forms and assert their content. Keep version-specific examples close to the API. |
+| Call the loopback MCP server from the development shell | Expected an HTTP response; the sandbox blocked the connection | Minor, local environment | Use explicitly authorized localhost network access. Report connection denial separately from protocol failure. |
+
+These are development observations. The proposed fixes are requests, not claims that Alexa+ itself caused the SDK or local-environment issues.

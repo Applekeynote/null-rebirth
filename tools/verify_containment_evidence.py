@@ -1,6 +1,5 @@
 """Verify downloaded current-state KMS signatures without AWS credentials."""
 import sys
-import sys
 import base64
 import json
 from pathlib import Path
