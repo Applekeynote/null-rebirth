@@ -1,0 +1,14 @@
+{
+  "offline_signature_valid": true,
+  "tampering_rejected": true,
+  "all_seven_lambda_packages_match_local": true,
+  "deployed_template_matches_local": true,
+  "historical_proof_only": true,
+  "current_health_asserted": false,
+  "package_report": "HEALING_DEPLOYMENT_REPORT.json",
+  "template_report": "HEALING_DEPLOYED_TEMPLATE.json",
+  "twenty_healing_signatures_valid": true,
+  "twenty_healing_tamper_cases_rejected": true,
+  "live_model_calls_recorded": 42,
+  "healing_orders_created": 0
+}

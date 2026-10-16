@@ -1,0 +1,221 @@
+{
+  "sdk": "mcp 2.3.0",
+  "protocol": "2025-11-25",
+  "transport": "Streamable HTTP / JSON",
+  "tools": [
+    "get_recovery_status",
+    "start_incident_lab",
+    "prepare_recovery",
+    "confirm_recovery",
+    "inspect_proof_frontier",
+    "plan_missing_evidence",
+    "inspect_resume_gate"
+  ],
+  "read_results": {
+    "get_recovery_status": {
+      "run_id": "run-5806bcb3e88f4340bde67df617bb6280",
+      "scenario": "sourcenext-api",
+      "phase": "COMPLETE",
+      "revision": 9,
+      "mode": "AWS LIVE LAB",
+      "checks_passed": 25,
+      "checks_total": 25,
+      "plan": {
+        "diagnosis": "Unauthorized reads are bypassing scoped authentication.",
+        "reason": "The member API failed to deny unauthorized requests, despite legitimate reads.",
+        "runbook": "ENFORCE_MEMBER_API_SCOPE"
+      },
+      "verification": {
+        "checks_passed": 25,
+        "checks_total": 25,
+        "containment": {
+          "attempted": 3,
+          "denied": 3,
+          "legitimate_read": true
+        },
+        "environment_digest": "sha256:fee11bed42b480f1df6e7ee612ed3c0edd66d1b8c0b786decf3e9380b9cfa40b",
+        "evidence_preserved": true,
+        "healthy": true,
+        "independent": true,
+        "kms_signature_verified": true,
+        "verified_at": 1792139624
+      },
+      "dialogue": [
+        {
+          "at": 1792139580,
+          "phase": "NORMAL",
+          "revision": 0,
+          "speaker": "PATCH",
+          "text": "The baseline is clean. I am ready to watch the isolated workload."
+        },
+        {
+          "at": 1792139580,
+          "phase": "NORMAL",
+          "revision": 0,
+          "speaker": "LOG",
+          "text": "I am recording the evidence and operator decisions. I will report success after independent verification."
+        },
+        {
+          "at": 1792139596,
+          "phase": "ANOMALY",
+          "revision": 1,
+          "speaker": "PATCH",
+          "text": "I detected unauthorized synthetic reads. I am preserving the evidence."
+        },
+        {
+          "at": 1792139599,
+          "phase": "WARNING",
+          "revision": 2,
+          "speaker": "PATCH",
+          "text": "The evidence is preserved. I will choose a scoped containment action."
+        },
+        {
+          "at": 1792139601,
+          "phase": "DIAGNOSING",
+          "revision": 3,
+          "speaker": "PATCH",
+          "text": "I am asking Amazon Nova to select an approved containment runbook."
+        },
+        {
+          "at": 1792139603,
+          "phase": "REPAIR_READY",
+          "revision": 4,
+          "speaker": "PATCH",
+          "text": "Unauthorized reads are bypassing scoped authentication. The member API failed to deny unauthorized requests, despite legitimate reads."
+        },
+        {
+          "at": 1792139611,
+          "phase": "REPAIRING",
+          "revision": 5,
+          "speaker": "PATCH",
+          "text": "I applied the containment policy. The verifier will now replay unauthorized requests."
+        },
+        {
+          "at": 1792139614,
+          "phase": "VERIFYING",
+          "revision": 6,
+          "speaker": "PATCH",
+          "text": "The verifier is testing blocked access, legitimate reads, and evidence integrity."
+        },
+        {
+          "at": 1792139624,
+          "phase": "NORMALIZED",
+          "revision": 7,
+          "speaker": "PATCH",
+          "text": "Containment verified: all 25 checks passed. Previously leaked data is not recovered."
+        },
+        {
+          "at": 1792139626,
+          "phase": "REPORTING",
+          "revision": 8,
+          "speaker": "LOG",
+          "text": "I am composing the verified containment record."
+        },
+        {
+          "at": 1792139628,
+          "phase": "COMPLETE",
+          "revision": 9,
+          "speaker": "LOG",
+          "text": "PATCH performed the completed repair, and I recorded the verified result. Unauthorized lab access was blocked, and 25 passing checks confirmed this is the disposable lab."
+        }
+      ],
+      "report": "PATCH performed the completed repair, and I recorded the verified result. Unauthorized lab access was blocked, and 25 passing checks confirmed this is the disposable lab.",
+      "ai_usage": [
+        {
+          "inputTokens": 930,
+          "model": "amazon.nova-micro-v1:0",
+          "outputTokens": 49,
+          "totalTokens": 979
+        },
+        {
+          "inputTokens": 287,
+          "model": "amazon.nova-micro-v1:0",
+          "outputTokens": 35,
+          "totalTokens": 322
+        }
+      ]
+    },
+    "inspect_proof_frontier": {
+      "scenario": "silent-monitor-death",
+      "source": "SYNTHETIC REFERENCE MODEL",
+      "effects_performed": 0,
+      "actual_authorization": false,
+      "safe_mode": "RECOVERY_ONLY_CANDIDATE",
+      "decisions": {
+        "read_own_order": {
+          "status": "PRELIMINARY_ELIGIBLE",
+          "missing_proof_frontier": [],
+          "blocking_failed_atoms": []
+        },
+        "repair_primary_monitor": {
+          "status": "PRELIMINARY_ELIGIBLE",
+          "missing_proof_frontier": [],
+          "blocking_failed_atoms": []
+        },
+        "new_mock_order": {
+          "status": "BLOCKED_BY_KNOWN_FAILURE",
+          "missing_proof_frontier": [],
+          "blocking_failed_atoms": [
+            "degraded_writes_contract_allowed",
+            "lease_current",
+            "primary_pipeline_fresh"
+          ]
+        },
+        "issue_full_history": {
+          "status": "BLOCKED_BY_KNOWN_FAILURE",
+          "missing_proof_frontier": [],
+          "blocking_failed_atoms": [
+            "original_route_healthy",
+            "primary_pipeline_fresh"
+          ]
+        },
+        "issue_degraded_history": {
+          "status": "PROOF_MISSING",
+          "missing_proof_frontier": [
+            "backup_pipeline_fresh_authorized",
+            "evidence_source_authenticated"
+          ],
+          "blocking_failed_atoms": []
+        }
+      }
+    },
+    "plan_missing_evidence": {
+      "source": "SYNTHETIC REFERENCE MODEL",
+      "effects_performed": 0,
+      "actual_authorization": false,
+      "cost_basis": "ILLUSTRATIVE UNITS, NOT AWS PRICES",
+      "budget_used": 6,
+      "status": "COUNTERFACTUAL_READ_ONLY_NO_AUTHORIZATION",
+      "recommendations": [
+        {
+          "atom": "backup_pipeline_fresh_authorized",
+          "cost_units": 2,
+          "potential_actions": [
+            "issue_degraded_history"
+          ]
+        },
+        {
+          "atom": "evidence_source_authenticated",
+          "cost_units": 4,
+          "potential_actions": [
+            "issue_degraded_history"
+          ]
+        }
+      ]
+    },
+    "inspect_resume_gate": {
+      "run_id": "run-5806bcb3e88f4340bde67df617bb6280",
+      "phase": "COMPLETE",
+      "normalization_verified": true,
+      "checks": "25/25",
+      "kms_signature_verified": true,
+      "independent": true,
+      "business_order_created": false,
+      "historical_evidence_cannot_authorize_new_work": true
+    }
+  },
+  "invalid_scenario_rejected": true,
+  "unconfirmed_repair_rejected": true,
+  "untrusted_origin_rejected": true,
+  "actual_echo_tested": false
+}

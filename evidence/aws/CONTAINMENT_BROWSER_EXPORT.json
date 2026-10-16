@@ -1,0 +1,608 @@
+{
+  "incident": {
+    "id": "sourcenext-api",
+    "title": "The abused member API",
+    "company": "Sourcenext",
+    "date": "2026-10-15",
+    "category": "SECURITY",
+    "component": "EDGE",
+    "summary": "22,519,960 potentially affected records; unauthorized use of a member-information API was disclosed.",
+    "adaptation": "Preserve synthetic access evidence, require a scoped lab API principal, and re-test unauthorized reads.",
+    "source": "https://www.sourcenext.com/support/i/2026/1015_info/",
+    "mode": "containment",
+    "affected_count": 22519960,
+    "affected_label": "POTENTIALLY AFFECTED RECORDS",
+    "source_checked": "2026-10-16"
+  },
+  "result": {
+    "run_id": "run-311161611af04826a2090b63517689cd",
+    "scenario": "sourcenext-api",
+    "phase": "COMPLETE",
+    "revision": 9,
+    "started_at": 1792131362,
+    "updated_at": 1792131403,
+    "lease_until": 1792132262,
+    "history": [
+      {
+        "at": 1792131362,
+        "phase": "NORMAL",
+        "revision": 0
+      },
+      {
+        "at": 1792131370,
+        "phase": "ANOMALY",
+        "revision": 1
+      },
+      {
+        "at": 1792131378,
+        "phase": "WARNING",
+        "revision": 2
+      },
+      {
+        "at": 1792131382,
+        "phase": "DIAGNOSING",
+        "revision": 3
+      },
+      {
+        "at": 1792131384,
+        "phase": "REPAIR_READY",
+        "revision": 4
+      },
+      {
+        "at": 1792131388,
+        "phase": "REPAIRING",
+        "revision": 5
+      },
+      {
+        "at": 1792131393,
+        "phase": "VERIFYING",
+        "revision": 6
+      },
+      {
+        "at": 1792131398,
+        "phase": "NORMALIZED",
+        "revision": 7
+      },
+      {
+        "at": 1792131402,
+        "phase": "REPORTING",
+        "revision": 8
+      },
+      {
+        "phase": "COMPLETE",
+        "at": 1792131403,
+        "revision": 9
+      }
+    ],
+    "observed": {
+      "challenge": "A",
+      "checks": [
+        {
+          "actual": true,
+          "component": "EDGE",
+          "detail": "Rule interpreter instruction budget <= 128",
+          "expected": true,
+          "id": "waf",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "NETWORK",
+          "detail": "Twelve routed requests; no site receives more than four",
+          "expected": true,
+          "id": "bgp",
+          "passed": true
+        },
+        {
+          "actual": "allow-service",
+          "component": "NETWORK",
+          "detail": "First matching route policy must permit service",
+          "expected": "allow-service",
+          "id": "filter",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "DATA",
+          "detail": "Single writable leader and journal-consistent replicas",
+          "expected": true,
+          "id": "leaders",
+          "passed": true
+        },
+        {
+          "actual": [
+            "alpha",
+            "beta",
+            "gamma"
+          ],
+          "component": "DATA",
+          "detail": "Read every expected record; check exact values",
+          "expected": [
+            "alpha",
+            "beta",
+            "gamma"
+          ],
+          "id": "database",
+          "passed": true
+        },
+        {
+          "actual": "200:valid-config",
+          "component": "EDGE",
+          "detail": "Serve a valid triggering configuration",
+          "expected": "200:valid-config",
+          "id": "release",
+          "passed": true
+        },
+        {
+          "actual": "edge.lab",
+          "component": "NETWORK",
+          "detail": "Resolve the service through an advertised reachable path",
+          "expected": "edge.lab",
+          "id": "dns",
+          "passed": true
+        },
+        {
+          "actual": 8,
+          "component": "IDENTITY",
+          "detail": "Authenticate eight disposable sandbox principals",
+          "expected": 8,
+          "id": "quota",
+          "passed": true
+        },
+        {
+          "actual": 8,
+          "component": "COMPUTE",
+          "detail": "Drain eight jobs within four bounded scheduler quanta",
+          "expected": 8,
+          "id": "workers",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "COMPUTE",
+          "detail": "Subscription work completes within sixteen scheduler ticks",
+          "expected": true,
+          "id": "coordination",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "DATA",
+          "detail": "Obtain two matching replica responses out of three",
+          "expected": true,
+          "id": "quorum",
+          "passed": true
+        },
+        {
+          "actual": {
+            "obj-a": "A",
+            "obj-b": "B",
+            "obj-c": "C"
+          },
+          "component": "DATA",
+          "detail": "Fetch all objects through their lookup index",
+          "expected": {
+            "obj-a": "A",
+            "obj-b": "B",
+            "obj-c": "C"
+          },
+          "id": "index",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "NETWORK",
+          "detail": "Eight requests generate at most sixteen downstream calls",
+          "expected": true,
+          "id": "retries",
+          "passed": true
+        },
+        {
+          "actual": {
+            "active": true,
+            "projects": [
+              "aurora",
+              "orbit"
+            ],
+            "site": "review-lab"
+          },
+          "component": "DATA",
+          "detail": "Resolve the site and its complete project manifest",
+          "expected": {
+            "active": true,
+            "projects": [
+              "aurora",
+              "orbit"
+            ],
+            "site": "review-lab"
+          },
+          "id": "tenant",
+          "passed": true
+        },
+        {
+          "actual": [
+            "process",
+            "path",
+            "event"
+          ],
+          "component": "EDGE",
+          "detail": "Decode all fields required by the content interpreter",
+          "expected": [
+            "process",
+            "path",
+            "event"
+          ],
+          "id": "schema",
+          "passed": true
+        },
+        {
+          "actual": "200:control",
+          "component": "COMPUTE",
+          "detail": "Serve control requests from a powered site",
+          "expected": "200:control",
+          "id": "power",
+          "passed": true
+        },
+        {
+          "actual": [
+            "central",
+            "east",
+            "west"
+          ],
+          "component": "NETWORK",
+          "detail": "All unaffected control jobs must respond",
+          "expected": [
+            "central",
+            "east",
+            "west"
+          ],
+          "id": "maintenance",
+          "passed": true
+        },
+        {
+          "actual": "2013-02-28",
+          "component": "IDENTITY",
+          "detail": "Create a valid one-year leap-day certificate boundary",
+          "expected": "2013-02-28",
+          "id": "calendar",
+          "passed": true
+        },
+        {
+          "actual": true,
+          "component": "IDENTITY",
+          "detail": "Evaluate both required operations using non-null policy fields",
+          "expected": true,
+          "id": "policy",
+          "passed": true
+        },
+        {
+          "actual": "200:kv-value",
+          "component": "EDGE",
+          "detail": "Read a value through the production build route",
+          "expected": "200:kv-value",
+          "id": "deployment",
+          "passed": true
+        },
+        {
+          "actual": {
+            "attempted": 3,
+            "denied": 0,
+            "legitimate_read": true
+          },
+          "component": "EDGE",
+          "detail": "Deny three unauthorized requests with zero returned records; retain a legitimate read. Mechanism: scoped_auth",
+          "expected": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "id": "member_api",
+          "passed": false
+        },
+        {
+          "actual": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "component": "NETWORK",
+          "detail": "Deny three unauthorized requests with zero returned records; retain a legitimate read. Mechanism: origin_allowlist",
+          "expected": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "id": "app_members",
+          "passed": true
+        },
+        {
+          "actual": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "component": "COMPUTE",
+          "detail": "Deny three unauthorized requests with zero returned records; retain a legitimate read. Mechanism: device_isolation",
+          "expected": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "id": "vendor_endpoint",
+          "passed": true
+        },
+        {
+          "actual": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "component": "DATA",
+          "detail": "Deny three unauthorized requests with zero returned records; retain a legitimate read. Mechanism: document_boundary",
+          "expected": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "id": "document_gateway",
+          "passed": true
+        },
+        {
+          "actual": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "component": "IDENTITY",
+          "detail": "Deny three unauthorized requests with zero returned records; retain a legitimate read. Mechanism: session_revocation",
+          "expected": {
+            "attempted": 3,
+            "denied": 3,
+            "legitimate_read": true
+          },
+          "id": "member_export",
+          "passed": true
+        }
+      ],
+      "environment_digest": "sha256:a97955bb803c89bcae4515292088177aac35b8c7d419345e09c277ab8362247b",
+      "failed": [
+        "member_api"
+      ],
+      "healthy": false,
+      "metrics": {
+        "authenticated": 8,
+        "downstream_calls": 9,
+        "failed_checks": 1,
+        "queue_completed": 8,
+        "rule_instructions": 45,
+        "scheduler_ticks": 8,
+        "success_percent": 96
+      },
+      "observed_at": 1792131373,
+      "passed_count": 24,
+      "revision": 1,
+      "run_id": "run-311161611af04826a2090b63517689cd",
+      "total": 25
+    },
+    "plan": {
+      "diagnosis": "Unauthorized reads are bypassing scoped authentication.",
+      "reason": "The member API is not enforcing scoped lab API principal for unauthorized reads.",
+      "runbook": "ENFORCE_MEMBER_API_SCOPE"
+    },
+    "delta": [
+      {
+        "after": {
+          "app_members": {
+            "allowed_origins": [
+              "trusted-app.lab"
+            ]
+          },
+          "document_gateway": {
+            "audiences": [
+              "trusted-service.lab"
+            ],
+            "external_download": false
+          },
+          "member_api": {
+            "anonymous_read": false,
+            "required_scope": "member:read"
+          },
+          "member_export": {
+            "bulk_export": false,
+            "revoked_sessions": [
+              "compromised-session.lab"
+            ]
+          },
+          "vendor_endpoint": {
+            "quarantined_devices": [
+              "vendor-pc.lab"
+            ],
+            "vendor_access": false
+          }
+        },
+        "before": {
+          "app_members": {
+            "allowed_origins": [
+              "trusted-app.lab"
+            ]
+          },
+          "document_gateway": {
+            "audiences": [
+              "trusted-service.lab"
+            ],
+            "external_download": false
+          },
+          "member_api": {
+            "anonymous_read": true,
+            "required_scope": null
+          },
+          "member_export": {
+            "bulk_export": false,
+            "revoked_sessions": [
+              "compromised-session.lab"
+            ]
+          },
+          "vendor_endpoint": {
+            "quarantined_devices": [
+              "vendor-pc.lab"
+            ],
+            "vendor_access": false
+          }
+        },
+        "field": "security_policy"
+      }
+    ],
+    "verification": {
+      "checks_passed": 25,
+      "checks_total": 25,
+      "containment": {
+        "attempted": 3,
+        "denied": 3,
+        "legitimate_read": true
+      },
+      "environment_digest": "sha256:fee11bed42b480f1df6e7ee612ed3c0edd66d1b8c0b786decf3e9380b9cfa40b",
+      "evidence_preserved": true,
+      "healthy": true,
+      "independent": true,
+      "kms_signature_verified": true,
+      "verified_at": 1792131398
+    },
+    "report": "PATCH performed the ENFORCE_MEMBER_API_SCOPE repair, and I recorded the verified result. Unauthorized lab access was blocked in this disposable lab with 25 passing checks.",
+    "ai_usage": [
+      {
+        "inputTokens": 930,
+        "model": "amazon.nova-micro-v1:0",
+        "outputTokens": 51,
+        "totalTokens": 981
+      },
+      {
+        "model": "amazon.nova-micro-v1:0",
+        "inputTokens": 287,
+        "outputTokens": 39,
+        "totalTokens": 326
+      }
+    ],
+    "report_engine": "AMAZON_NOVA_MICRO",
+    "diagnosis_attempts": [
+      {
+        "accepted": true,
+        "attempt": 1
+      }
+    ],
+    "dialogue": [
+      {
+        "at": 1792131362,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "PATCH",
+        "text": "The baseline is clean. I am ready to watch the isolated workload."
+      },
+      {
+        "at": 1792131362,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "LOG",
+        "text": "I am recording the evidence and operator decisions. I will report success after independent verification."
+      },
+      {
+        "at": 1792131370,
+        "phase": "ANOMALY",
+        "revision": 1,
+        "speaker": "PATCH",
+        "text": "I detected unauthorized synthetic reads. I am preserving the evidence."
+      },
+      {
+        "at": 1792131378,
+        "phase": "WARNING",
+        "revision": 2,
+        "speaker": "PATCH",
+        "text": "The evidence is preserved. I will choose a scoped containment action."
+      },
+      {
+        "at": 1792131382,
+        "phase": "DIAGNOSING",
+        "revision": 3,
+        "speaker": "PATCH",
+        "text": "I am asking Amazon Nova to select an approved containment runbook."
+      },
+      {
+        "at": 1792131384,
+        "phase": "REPAIR_READY",
+        "revision": 4,
+        "speaker": "PATCH",
+        "text": "Unauthorized reads are bypassing scoped authentication. The member API is not enforcing scoped lab API principal for unauthorized reads."
+      },
+      {
+        "at": 1792131388,
+        "phase": "REPAIRING",
+        "revision": 5,
+        "speaker": "PATCH",
+        "text": "I applied the containment policy. The verifier will now replay unauthorized requests."
+      },
+      {
+        "at": 1792131393,
+        "phase": "VERIFYING",
+        "revision": 6,
+        "speaker": "PATCH",
+        "text": "The verifier is testing blocked access, legitimate reads, and evidence integrity."
+      },
+      {
+        "at": 1792131398,
+        "phase": "NORMALIZED",
+        "revision": 7,
+        "speaker": "PATCH",
+        "text": "Containment verified: all 25 checks passed. Previously leaked data is not recovered."
+      },
+      {
+        "at": 1792131402,
+        "phase": "REPORTING",
+        "revision": 8,
+        "speaker": "LOG",
+        "text": "I am composing the verified containment record."
+      },
+      {
+        "speaker": "LOG",
+        "text": "PATCH performed the ENFORCE_MEMBER_API_SCOPE repair, and I recorded the verified result. Unauthorized lab access was blocked in this disposable lab with 25 passing checks.",
+        "phase": "COMPLETE",
+        "at": 1792131403,
+        "revision": 9
+      }
+    ],
+    "containment_evidence": {
+      "events": [
+        {
+          "gate": "member_api",
+          "result": {
+            "attempted": 3,
+            "denied": 0,
+            "legitimate_read": true
+          },
+          "sequence": 0,
+          "signal": "SYNTHETIC_UNAUTHORIZED_READ"
+        },
+        {
+          "gate": "member_api",
+          "result": {
+            "attempted": 3,
+            "denied": 0,
+            "legitimate_read": true
+          },
+          "sequence": 1,
+          "signal": "SYNTHETIC_UNAUTHORIZED_READ"
+        },
+        {
+          "gate": "member_api",
+          "result": {
+            "attempted": 3,
+            "denied": 0,
+            "legitimate_read": true
+          },
+          "sequence": 2,
+          "signal": "SYNTHETIC_UNAUTHORIZED_READ"
+        }
+      ],
+      "events_digest": "sha256:f62d0e950223b1d122b93262b11599f127978c153994bcea125cb17770ee21b2",
+      "synthetic_only": true
+    }
+  }
+}

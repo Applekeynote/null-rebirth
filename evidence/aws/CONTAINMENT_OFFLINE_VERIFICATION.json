@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "scenario": "sourcenext-api",
+      "signature_valid": true,
+      "tampering_rejected": true
+    },
+    {
+      "scenario": "monogatari-members",
+      "signature_valid": true,
+      "tampering_rejected": true
+    },
+    {
+      "scenario": "daiichi-vendor",
+      "signature_valid": true,
+      "tampering_rejected": true
+    },
+    {
+      "scenario": "times-documents",
+      "signature_valid": true,
+      "tampering_rejected": true
+    },
+    {
+      "scenario": "bookoff-members",
+      "signature_valid": true,
+      "tampering_rejected": true
+    },
+    {
+      "scenario": "lost-database",
+      "signature_valid": true,
+      "tampering_rejected": true
+    }
+  ],
+  "count": 6
+}

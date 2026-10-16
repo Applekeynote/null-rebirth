@@ -1,0 +1,15 @@
+.deps/
+.lintdeps/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+dist/
+deployment-secrets.json
+*.token
+.mcpdeps/
+publish/
+*.pem
+*.key
+.env
+.env.*
