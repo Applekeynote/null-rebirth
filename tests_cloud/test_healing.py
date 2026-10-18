@@ -60,6 +60,8 @@ def fake_model(rt, system, data, max_tokens=384):
 def to_verifying(rt, monkeypatch, incident="regex-exhaustion"):
     monkeypatch.setattr(healing, "model_call", fake_model)
     state = healing.start(rt, {"scenario": incident});run = state["run_id"]
+    monkeypatch.setattr(healing,"utc_now",lambda:state["fault_due_at"])
+    monkeypatch.setattr(healing,"utc_now",lambda:state["fault_due_at"])
     healing.observe(rt, {"run_id": run})
     while state["phase"] != "VERIFYING":
         state = healing.advance(rt, {"run_id": run, "revision": state["revision"]})
@@ -107,6 +109,8 @@ def test_tampering_or_stale_evidence_never_normalizes(monkeypatch, tamper):
 
 def test_unavailable_ai_does_not_apply_a_fixed_fallback(monkeypatch):
     rt = FakeRuntime();state = healing.start(rt, {"scenario": "lost-database"});run=state["run_id"]
+    due=state["fault_due_at"];monkeypatch.setattr(healing,"utc_now",lambda:due)
+    due=state["fault_due_at"];monkeypatch.setattr(healing,"utc_now",lambda:due)
     state = healing.advance(rt, {"run_id": run, "revision": state["revision"]})
     healing.observe(rt, {"run_id": run})
     state = healing.advance(rt, {"run_id": run, "revision": state["revision"]})
@@ -122,6 +126,8 @@ def test_unavailable_ai_does_not_apply_a_fixed_fallback(monkeypatch):
 @pytest.mark.parametrize("correct_second", [True, False])
 def test_rejected_model_plan_gets_bounded_feedback_without_repair(monkeypatch, correct_second):
     rt=FakeRuntime();state=healing.start(rt,{"scenario":"dns-withdrawal"});run=state["run_id"]
+    due=state["fault_due_at"];monkeypatch.setattr(healing,"utc_now",lambda:due)
+    due=state["fault_due_at"];monkeypatch.setattr(healing,"utc_now",lambda:due)
     state=healing.advance(rt,{"run_id":run,"revision":state["revision"]})
     healing.observe(rt,{"run_id":run})
     state=healing.advance(rt,{"run_id":run,"revision":state["revision"]})

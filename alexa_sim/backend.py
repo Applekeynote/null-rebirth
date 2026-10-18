@@ -23,7 +23,6 @@ class Lab:
     def request(self,path,body=None):
         if self.mode!='aws':raise ValueError('Recorded mode is read-only. Set NR_MODE=aws for a live run.')
         if hashlib.sha256(BASE.encode()).hexdigest()!=EXPECTED_BASE_SHA256:raise ValueError('Set NR_LAB_URL to the judge-only exhibition endpoint.')
-        if hashlib.sha256(BASE.encode()).hexdigest()!=EXPECTED_BASE_SHA256:raise ValueError('Set NR_LAB_URL to the judge-only exhibition endpoint.')
         keyfile=os.environ.get('NR_REVIEW_KEY_FILE')
         if not keyfile:raise ValueError('Server review key is not configured.')
         key=Path(keyfile).read_text().strip()
@@ -54,15 +53,24 @@ class Lab:
         with self.lock:
             state=self.state(run_id)
             if state['run_id'] not in self.owned:raise ValueError('Recorded evidence cannot authorize a new repair. Start a live lab first.')
+            if state['phase']=='NORMAL' and time.time()<state.get('fault_due_at',0):raise ValueError('Monitoring is active. The scheduled fault has not occurred yet.')
             for _ in range(6):
                 if state['phase']=='REPAIR_READY':break
                 if state['phase'] in {'COMPLETE','BLOCKED','REPAIRING','VERIFYING','NORMALIZED','REPORTING'}:raise ValueError('This run cannot prepare another repair.')
+                if state.get('fault_due_at') and state['phase'] in {'ANOMALY','WARNING'}:time.sleep(3)
                 state=self.step(state)
             if state['phase']!='REPAIR_READY':raise ValueError('No validated repair proposal is ready.')
+            return self.permit(state)
+    def permit(self,state):
+        with self.lock:
+            if state['run_id'] not in self.owned or state['phase']!='REPAIR_READY':raise ValueError('No owned proposal is ready.')
+            # At most one valid permit per run. Re-review invalidates the old one.
+            self.pending={k:v for k,v in self.pending.items() if v['run_id']!=state['run_id'] and time.monotonic()<=v['until']}
             token=secrets.token_urlsafe(24)
             self.pending[token]={'run_id':state['run_id'],'revision':state['revision'],
                 'plan':hashlib.sha256(json.dumps(state['plan'],sort_keys=True).encode()).hexdigest(), 'until':time.monotonic()+120}
             return {'state':state,'confirmation_id':token,'confirmation_required':True,
+                'confirmation_expires_at':time.time()+120,
                 'message':'Review the approved runbook. Confirm explicitly to apply it to this isolated workload.'}
     def confirm(self,run_id,confirmation_id):
         with self.lock:
@@ -85,4 +93,6 @@ def summary(state,mode):
         'checks_passed':v.get('checks_passed',probe.get('passed_count',0)),
         'checks_total':v.get('checks_total',probe.get('total',25)),
         'plan':state.get('plan'),'verification':v,'dialogue':state.get('dialogue',[]),
-        'report':state.get('report'),'ai_usage':state.get('ai_usage',[])}
+        'report':state.get('report'),'ai_usage':state.get('ai_usage',[]),
+        'started_at':state.get('started_at'),'fault_due_at':state.get('fault_due_at'),
+        'fault_delay_seconds':state.get('fault_delay_seconds')}

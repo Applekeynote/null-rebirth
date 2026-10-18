@@ -2,13 +2,13 @@
 
 **Proof before recovery.** An Alexa+ experience simulation for a bounded recovery lab on AWS.
 
-Ask for status, prepare a repair, review the proposed action, and confirm it. PATCH applies the approved fix. LOG reports what the checks and signed evidence actually show.
+Choose a scenario and start monitoring. After a random 2–5 minutes, the selected fault occurs and PATCH diagnoses it automatically. Review the proposed action, then confirm it. PATCH applies the approved fix. LOG reports what the checks and signed evidence actually show.
 
 This project uses a browser host to simulate an Alexa+ conversation. It is **not connected to an Alexa account or an Echo**. The host has a constrained intent router; Amazon Nova Micro performs the live diagnosis and reporting. A self-hosted MCP server uses the official Python SDK and Streamable HTTP. Protocol version **2025-11-25** was explicitly negotiated in the interoperability test.
 
 ## Start with recorded evidence (no AWS account or key)
 
-Requires Python 3.12 or newer. Tested on Windows with Python 3.14. Use an isolated virtual environment; this project uses the v2 MCP SDK.
+Requires Python 3.12 or newer. Tested on Windows with Python 3.12. Use an isolated virtual environment; this project uses the v2 MCP SDK.
 
 ```sh
 python -m venv .venv
@@ -40,13 +40,17 @@ $env:NR_REVIEW_KEY_FILE='C:/private/review-access.token'
 python alexa_sim/run.py
 ```
 
-Then use these requests in order:
+Then:
 
-1. `Alexa, start the member API lab.`
-2. `Alexa, prepare a repair.`
-3. Read PATCH's diagnosis and the approved runbook; then `Alexa, confirm the approved repair.`
+1. Select one of the 25 scenarios and click **Start monitoring**.
+2. Wait **2–5 minutes**. The persisted AWS deadline cannot be shortened by reloading or repeated requests. The local scheduler automatically injects the fault and obtains PATCH's validated plan. No natural-language command is needed to start or inject.
+3. Review PATCH's diagnosis and the approved runbook, then click **Confirm repair**. Approval lasts 120 seconds; **Review plan again** renews review of the same current plan without another diagnosis call.
 
-Preparing injects the selected synthetic fault and requests a diagnosis. It does not apply the repair. Confirmation expires after 120 seconds and is bound to the run, revision and plan. It can be consumed once. Wait for **COMPLETE**, 25 passing checks and LOG's report. The simulator permits at most five new runs per process; the deployment has lifetime limits of 300 runs and 600 model calls. A rejected proposal can trigger up to three diagnosis attempts.
+Keep the local server running during monitoring. Browser reloads and thread switches preserve the timer. Deleting a waiting conversation cancels its local timer. A server restart ends in-memory jobs; begin a fresh experiment after restarting. The standalone AWS command bridge progresses while its page is running and resumes its persisted run after a reload.
+
+Confirmation is bound to the run, revision and plan and can be consumed once. Wait for **COMPLETE**, 25 passing checks and LOG's report. The simulator permits at most five new runs per process; the deployment has lifetime limits of 300 runs and 600 model calls. A rejected proposal can trigger up to three diagnosis attempts. Waiting alone makes no model calls or AWS polling reads in the local scheduler.
+
+The workspace adjusts to its window. At smaller widths, use **Conversation / Live telemetry** to switch views; message history and long reports have their own scroll areas.
 
 The exhibition deployment is scheduled for deletion on **December 1, 2026 at 20:00 JST**, with a retry on December 2. After that, use recorded mode. The cost target is $5; alarms and counters reduce exposure but are not an exact billing cap.
 
@@ -85,21 +89,21 @@ The seven Lambda functions have separate roles. Two DynamoDB tables separate wor
 ```powershell
 $env:PYTHONPATH='.;source'
 python -m pytest tests_cloud tests_alexa -q
-python tools/verify_containment_evidence.py C:/private/CONTAINMENT_VALIDATION.json C:/private/CONTAINMENT_VALIDATION.json C:/private/CONTAINMENT_VALIDATION.json
+python tools/verify_containment_evidence.py C:/private/CONTAINMENT_VALIDATION.json
 # With the local simulator running:
 python alexa_sim/verify_interop.py
 ```
 
-- **167 local tests passed:** 133 backend tests and 34 simulator boundary and conversation tests.
+- **176 local tests passed (October 18):** fault deadline boundaries, early/repeated requests, scheduler cancellation, failed diagnosis, backend safety gates and conversation boundaries.
 - **Six AWS acceptance cases:** five containment cases and one recovery regression, 25 functional checks each. Six exported signatures verified offline; all six altered payloads were rejected.
 - **One additional MCP-to-AWS run:** 25/25 checks, three unauthorized requests denied, legitimate reads and evidence preserved, KMS signature verified. Two model calls. Its KMS result is the backend verification flag; a separate offline signature export was not collected for this additional run.
 - **MCP interop:** official SDK client, explicit 2025-11-25 negotiation, seven tools, invalid case rejected, unconfirmed repair rejected and untrusted Origin rejected.
 
-See `evidence/aws/` and `evidence/public-tests.xml`. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. These are dated test records, not a guarantee of future AI output.
+See `evidence/aws/` and `evidence/public-tests.xml`. Public records omit account IDs, deployment endpoints and original signed attestations whose bodies include key identifiers. The original signature bundle is supplied privately to judges; do not use a redacted record as a signature-verification input. These are dated test records, not a guarantee of future AI output.
 
 ## Deployment source
 
-`cloud/` contains runtime, UI and CloudFormation generation. `source/rpp_v15/` and `source/rpp_v16/` contain the pure reference policy/planner used here. `tools/build_cloud.py` creates packages locally without contacting AWS. Deployment tools stage changes as prepare → review → execute; they are administrator utilities, not necessary for judging. The template contains the exhibition's fixed names, region and cleanup dates. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Review those before adapting it to another account. Do not run an old dated template as a general-purpose production deployment.
+`cloud/` contains runtime, UI and CloudFormation generation. `source/rpp_v15/` and `source/rpp_v16/` contain the pure reference policy/planner used here. `tools/build_cloud.py` creates packages locally without contacting AWS. Deployment tools stage changes as prepare → review → execute; they are administrator utilities, not necessary for judging. The template contains the exhibition's fixed names, region and cleanup dates. Public administrator utilities require NR_ACCOUNT_ID and the cleanup utility also requires NR_KMS_KEY_ID. Review those before adapting it to another account. Do not run an old dated template as a general-purpose production deployment.
 
 ## Tradeoffs and next work
 

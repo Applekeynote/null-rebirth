@@ -157,6 +157,7 @@ async function waitBeat(ms){let remaining=reduced.checked?100:ms;while(remaining
 function accept(s){state=s;snapshots.push(structuredClone(s));sessionStorage.setItem('nr-heal-run',s.run_id);render(s);}
 async function sequence(){
  while(!['COMPLETE','BLOCKED'].includes(state.phase)){
+  if(state.phase==='NORMAL'&&state.fault_due_at){while(Date.now()/1000<state.fault_due_at){text('scene-detail','Monitoring · random fault window 2–5 minutes · '+Math.max(0,Math.floor(Date.now()/1000-state.started_at))+'s elapsed');await sleep(1000);}}
   await waitBeat(({NORMAL:900,ANOMALY:1800,WARNING:2600,REPAIR_READY:1800,REPAIRING:3000,NORMALIZED:1300})[state.phase]||900);
   if(state.phase==='WARNING')render({...state,phase:'DIAGNOSING'},true);
   const verifying=state.phase==='REPAIRING';if(verifying)render({...state,phase:'VERIFYING'},true);

@@ -3,7 +3,7 @@
 This is not a connection to Alexa+ or an Echo. A constrained intent router acts
 as the demo host; the AWS diagnosis and reporting are actual Nova calls in live mode.
 """
-import asyncio,contextlib,json,re,secrets
+import asyncio,contextlib,json,re,secrets,time
 from pathlib import Path
 from mcp import Client
 from mcp.server.mcpserver import MCPServer
@@ -15,16 +15,17 @@ from starlette.responses import JSONResponse,HTMLResponse,FileResponse
 from starlette.routing import Route,Mount
 from alexa_sim.backend import Lab,summary,ROOT
 from alexa_sim.advisory import frontier,acquisition
+from cloud.incidents import INCIDENTS
 
 PORT=8768;ORIGIN=f'http://127.0.0.1:{PORT}';WEB_TOKEN=secrets.token_urlsafe(32)
-lab=Lab();conversations={}
+lab=Lab();conversations={};jobs=set()
 
 def conversation_context(thread_id,run_id=''):
     if not re.fullmatch(r'[a-f0-9]{32}',thread_id):raise ValueError('Invalid conversation identifier.')
     if thread_id not in conversations:
         if len(conversations)>=100:raise ValueError('This server session has reached its conversation limit.')
         if run_id:lab.state(run_id)
-        conversations[thread_id]={'run_id':run_id or lab.recorded['run_id'],'pending':None,'lock':asyncio.Lock()}
+        conversations[thread_id]={'run_id':run_id or lab.recorded['run_id'],'pending':None,'lock':asyncio.Lock(),'monitor':None,'cached':None,'task':None}
     ctx=conversations[thread_id]
     if run_id and ctx['run_id']!=run_id:raise ValueError('The conversation run has changed. Read its current status before continuing.')
     return ctx
@@ -34,7 +35,7 @@ def conversation_arguments(ctx,tool,args):
     if tool in {'get_recovery_status','prepare_recovery','inspect_resume_gate'}:args['run_id']=ctx['run_id']
     if tool=='confirm_recovery':
         pending=ctx['pending'];ctx['pending']=None
-        if not pending:raise ValueError('Prepare and review a repair in this conversation first.')
+        if not pending:raise ValueError('Wait for the automatic diagnosis and review its proposal first.')
         args={'run_id':pending['state']['run_id'],'confirmation_id':pending['confirmation_id']}
     return args
 mcp=MCPServer('NULL REBIRTH',version='1.11.0',instructions='Inspect evidence. Prepare a bounded repair. Ask the user before confirm_recovery. Never treat reference advice as authorization.')
@@ -49,11 +50,11 @@ async def get_recovery_status(run_id:str='')->dict:
     return summary(state,mode)
 @mcp.tool(annotations=WRITE)
 async def start_incident_lab(scenario:str='sourcenext-api')->dict:
-    """Create one disposable synthetic incident workload. Explicit user request required."""
+    """Start a selected synthetic scenario with a persisted random 2–5 minute fault delay."""
     return summary(await asyncio.to_thread(lab.start,scenario),lab.mode)
 @mcp.tool(annotations=WRITE)
 async def prepare_recovery(run_id:str='')->dict:
-    """Inject/detect the selected fault and ask Nova for a validated plan. Does not apply the repair."""
+    """After the scheduled fault time, detect it and obtain a validated Nova plan. No repair is applied."""
     result=await asyncio.to_thread(lab.prepare,run_id)
     result['state']=summary(result['state'],lab.mode)
     return result
@@ -81,7 +82,11 @@ security=TransportSecuritySettings(enable_dns_rebinding_protection=True,allowed_
 mcp_app=mcp.streamable_http_app(streamable_http_path='/',json_response=True,stateless_http=True,transport_security=security,max_request_body_size=16384)
 @contextlib.asynccontextmanager
 async def lifespan(app):
-    async with mcp.session_manager.run():yield
+    async with mcp.session_manager.run():
+        try:yield
+        finally:
+            for task in list(jobs):task.cancel()
+            await asyncio.gather(*list(jobs),return_exceptions=True)
 
 async def home(request):
     text=Path(__file__).with_name('index.html').read_text(encoding='utf8').replace('__WEB_TOKEN__',WEB_TOKEN)
@@ -95,10 +100,78 @@ def intent(message):
     if any(w in m for w in ['acquisition','collect evidence','next evidence','証拠を集め']):return 'plan_missing_evidence',{}
     if any(w in m for w in ['frontier','missing proof','evidence is missing','足りない証拠']):return 'inspect_proof_frontier',{}
     if any(w in m for w in ['resume','再開']):return 'inspect_resume_gate',{}
-    if re.fullmatch(r'(?:please )?start (?:the |a |a new )?(?:member api )?(?:lab|experiment)',m) or m=='開始':return 'start_incident_lab',{'scenario':'sourcenext-api'}
-    if re.fullmatch(r'(?:please )?(?:prepare|request|plan) (?:a |the )?(?:repair|containment|fix)(?: plan)?',m) or m in {'repair it','fix it','contain it','修復','封じ込め'}:return 'prepare_recovery',{}
+    if re.search(r'\b(start|inject|prepare|repair it|fix it|contain it)\b',m) or m in {'開始','修復','封じ込め'}:raise ValueError('Choose a scenario and press Start monitoring. Fault injection and diagnosis run automatically after 2–5 minutes.')
     if any(w in m for w in ['status','what is wrong','happened','状態','状況']):return 'get_recovery_status',{}
-    raise ValueError('Try asking for status, starting the member API lab, preparing a repair, confirming it, or inspecting missing evidence.')
+    raise ValueError('Choose a scenario to start monitoring. You can ask for status, confirm a reviewed proposal, or inspect missing evidence.')
+
+async def call_tool(tool,args):
+    async with Client(ORIGIN+'/mcp/',read_timeout_seconds=180,mode='legacy') as client:
+        result=await client.call_tool(tool,args)
+        if result.is_error:raise ValueError(' '.join(c.text for c in result.content if hasattr(c,'text'))[:350])
+        return result.structured_content if result.structured_content is not None else json.loads(next(c.text for c in result.content if hasattr(c,'text')))
+
+def monitor_view(ctx):
+    result=dict(ctx['monitor'] or {})
+    pending=ctx['pending']
+    result['awaiting_confirmation']=bool(pending)
+    result['confirmation_expires_at']=pending.get('confirmation_expires_at') if pending else None
+    return result
+
+async def automatic_incident(ctx,delay):
+    try:
+        await asyncio.sleep(delay)
+        async with ctx['lock']:
+            if ctx['monitor']['status']!='WAITING':return
+            ctx['monitor']['status']='DIAGNOSING'
+            result=await call_tool('prepare_recovery',{'run_id':ctx['run_id']})
+            ctx['pending']=result;ctx['cached']=result['state']
+            ctx['monitor']['status']='REPAIR_READY'
+    except asyncio.CancelledError:raise
+    except Exception:
+        ctx['monitor']['status']='FAILED'
+        ctx['monitor']['error']='Automatic diagnosis stopped. Read the current status; no successful repair is assumed.'
+
+async def scenarios(request):
+    return JSONResponse([dict(id=i['id'],title=i['title'],company=i['company'],category=i['category'],mode=i.get('mode','recovery')) for i in INCIDENTS])
+
+async def experiment(request):
+    if not web_allowed(request):return JSONResponse({'error':'Local session or origin rejected.'},status_code=403)
+    try:
+        body=await request.json();ctx=conversation_context(body.get('thread_id',''),body.get('run_id',''))
+        async with ctx['lock']:
+            if ctx['monitor'] and ctx['monitor']['status'] in {'WAITING','DIAGNOSING','REPAIR_READY','REPAIRING'}:raise ValueError('This conversation already has an active experiment.')
+            data=await call_tool('start_incident_lab',{'scenario':body.get('scenario','')})
+            delay=data.get('fault_delay_seconds');due=data.get('fault_due_at')
+            if type(delay) is not int or not 120<=delay<=300 or not isinstance(due,(int,float)):raise ValueError('The deployed lab does not support scheduled faults yet. No fault was injected.')
+            ctx.update(run_id=data['run_id'],pending=None,cached=data,monitor={'status':'WAITING','started_at':data['started_at'],'fault_due_at':due})
+            task=asyncio.create_task(automatic_incident(ctx,max(0,due-time.time())+.25));ctx['task']=task;jobs.add(task);task.add_done_callback(jobs.discard)
+        return JSONResponse({'result':data,'monitor':monitor_view(ctx),'tool':'start_incident_lab'})
+    except (ValueError,KeyError,TypeError) as e:return JSONResponse({'error':str(e)[:350]},status_code=400)
+    except Exception:return JSONResponse({'error':'Could not start the selected experiment.'},status_code=502)
+
+async def review(request):
+    if not web_allowed(request):return JSONResponse({'error':'Local session or origin rejected.'},status_code=403)
+    try:
+        body=await request.json();ctx=conversation_context(body.get('thread_id',''),body.get('run_id',''))
+        async with ctx['lock']:
+            if not ctx['monitor'] or ctx['monitor']['status']!='REPAIR_READY':raise ValueError('No automatically diagnosed proposal is ready.')
+            # Re-issue only for the same still-current proposal, without another AI diagnosis.
+            data=await call_tool('prepare_recovery',{'run_id':ctx['run_id']});ctx['pending']=data;ctx['cached']=data['state']
+        return JSONResponse({'result':data['state'],'monitor':monitor_view(ctx)})
+    except (ValueError,KeyError,TypeError) as e:return JSONResponse({'error':str(e)[:350]},status_code=400)
+
+async def cancel_conversations(request):
+    if not web_allowed(request):return JSONResponse({'error':'Local session or origin rejected.'},status_code=403)
+    try:
+        ids=(await request.json()).get('thread_ids')
+        if not isinstance(ids,list) or len(ids)>100 or any(not isinstance(i,str) or not re.fullmatch(r'[a-f0-9]{32}',i) for i in ids):raise ValueError('Invalid conversations.')
+        for tid in ids:
+            ctx=conversations.get(tid)
+            if ctx and ctx['monitor'] and ctx['monitor']['status']=='WAITING':
+                ctx['monitor']['status']='CANCELLED'
+                if ctx['task']:ctx['task'].cancel()
+        return JSONResponse({'cancelled_waiting_jobs':True})
+    except (ValueError,TypeError):return JSONResponse({'error':'Invalid conversations.'},status_code=400)
 async def chat(request):
     if not web_allowed(request):return JSONResponse({'error':'Local session or origin rejected.'},status_code=403)
     if int(request.headers.get('content-length','0'))>2048:return JSONResponse({'error':'Message is too long.'},status_code=413)
@@ -109,22 +182,25 @@ async def chat(request):
         tool,args=intent(message)
         async with ctx['lock']:
             args=conversation_arguments(ctx,tool,args)
-            async with Client(ORIGIN+'/mcp/',read_timeout_seconds=180,mode='legacy') as client:
-                result=await client.call_tool(tool,args)
-                tool_error=' '.join(c.text for c in result.content if hasattr(c,'text')) if result.is_error else ''
-                data=result.structured_content
-                if not tool_error and data is None:data=json.loads(next(c.text for c in result.content if hasattr(c,'text')))
-            if tool_error:raise ValueError(tool_error)
+            data=await call_tool(tool,args)
             if tool=='prepare_recovery':ctx['pending']=data
             if tool=='start_incident_lab':ctx['pending']=None;ctx['run_id']=data['run_id']
+            if tool=='confirm_recovery':
+                ctx['cached']=data
+                if ctx['monitor']:ctx['monitor'].update(status=data['phase'],finished_at=time.time())
         return JSONResponse({'tool':tool,'arguments':args if tool!='confirm_recovery' else {'run_id':args['run_id'],'confirmation':'explicit user approval'},'result':data})
     except (ValueError,KeyError,TypeError) as e:return JSONResponse({'error':str(e)[:350]},status_code=400)
     except Exception:return JSONResponse({'error':'The MCP request could not complete. Inspect the local server connection.'},status_code=502)
 async def state(request):
     try:
         ctx=conversation_context(request.query_params.get('thread_id',''),request.query_params.get('run_id',''))
-        s=await asyncio.to_thread(lab.state,ctx['run_id'])
-        return JSONResponse(summary(s,lab.mode if s['run_id'] in lab.owned else 'recorded'),headers={'Cache-Control':'no-store'})
+        status=(ctx['monitor'] or {}).get('status')
+        if status in {'WAITING','REPAIR_READY','COMPLETE','CANCELLED'} and ctx['cached']:
+            data=dict(ctx['cached'])
+        else:
+            s=await asyncio.to_thread(lab.state,ctx['run_id']);data=summary(s,lab.mode if s['run_id'] in lab.owned else 'recorded')
+        data['monitor']=monitor_view(ctx)
+        return JSONResponse(data,headers={'Cache-Control':'no-store'})
     except ValueError as e:return JSONResponse({'error':str(e)},status_code=400)
 async def asset(request):
     name=request.path_params['name']
@@ -143,7 +219,7 @@ class LocalOnly:
             if host not in security.allowed_hosts or (origin and origin not in security.allowed_origins):
                 return await JSONResponse({'error':'Loopback host/origin required.'},status_code=403)(scope,receive,send)
         await self.app(scope,receive,send)
-app=LocalOnly(Starlette(routes=[Route('/',home),Route('/chat',chat,methods=['POST']),Route('/state',state),Route('/assets/{name}',asset),Route('/cat/{name}.svg',image),Mount('/mcp',app=mcp_app)],lifespan=lifespan))
+app=LocalOnly(Starlette(routes=[Route('/',home),Route('/chat',chat,methods=['POST']),Route('/scenarios',scenarios),Route('/experiments',experiment,methods=['POST']),Route('/review',review,methods=['POST']),Route('/conversations/cancel',cancel_conversations,methods=['POST']),Route('/state',state),Route('/assets/{name}',asset),Route('/cat/{name}.svg',image),Mount('/mcp',app=mcp_app)],lifespan=lifespan))
 if __name__=='__main__':
     import uvicorn
     uvicorn.run(app,host='127.0.0.1',port=PORT,access_log=False,log_level='warning')

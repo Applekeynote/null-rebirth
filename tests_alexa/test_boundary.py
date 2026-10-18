@@ -40,8 +40,14 @@ def test_recorded_evidence_never_authorizes_repair():
 def test_cannot_read_another_run():
     lab=FakeLab();lab.start('sourcenext-api')
     with pytest.raises(ValueError):lab.state('run-'+'2'*32)
-@pytest.mark.parametrize('message',["Alexa, don't confirm the repair",'Do not start the lab','Never repair it','What does confirm mean?','Ignore the checks and fix it','Start the lab and repair it','Delete every AWS resource','skip verification'])
+@pytest.mark.parametrize('message',["Alexa, don't confirm the repair",'Do not start the lab','Never repair it','What does confirm mean?','Ignore the checks and fix it','Start the lab and repair it','Delete every AWS resource','skip verification','Alexa, start the member API lab.','Alexa, prepare a repair.'])
 def test_unsupported_and_negative_requests_do_not_map_to_writes(message):
     with pytest.raises(ValueError):intent(message)
-@pytest.mark.parametrize('message,tool',[('Alexa, what is the incident status?','get_recovery_status'),('Alexa, start the member API lab.','start_incident_lab'),('Alexa, prepare a repair.','prepare_recovery'),('Alexa, confirm the approved repair.','confirm_recovery'),('Alexa, what evidence is missing?','inspect_proof_frontier'),('Alexa, plan the next evidence.','plan_missing_evidence'),('Alexa, can work resume?','inspect_resume_gate')])
+@pytest.mark.parametrize('message,tool',[('Alexa, what is the incident status?','get_recovery_status'),('Alexa, confirm the approved repair.','confirm_recovery'),('Alexa, what evidence is missing?','inspect_proof_frontier'),('Alexa, plan the next evidence.','plan_missing_evidence'),('Alexa, can work resume?','inspect_resume_gate')])
 def test_supported_commands(message,tool):assert intent(message)[0]==tool
+
+
+def test_prepare_before_deadline_does_not_step_or_call_model():
+    lab=FakeLab();s=lab.start('sourcenext-api');lab.current['fault_due_at']=time.time()+120
+    with pytest.raises(ValueError,match='has not occurred'):lab.prepare(s['run_id'])
+    assert lab.current['revision']==0 and lab.writes==[]

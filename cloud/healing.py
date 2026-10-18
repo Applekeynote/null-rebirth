@@ -9,6 +9,7 @@ import copy
 import hashlib
 import json
 import os
+import secrets
 import uuid
 import boto3
 from botocore.config import Config
@@ -22,6 +23,7 @@ MODEL = "amazon.nova-micro-v1:0"
 DOMAIN = "NULL_REBIRTH_HEALING_LAB_ECDSA_V1"
 TERMINAL = {"COMPLETE", "BLOCKED"}
 PUBLIC = ("run_id", "scenario", "phase", "revision", "started_at", "updated_at", "lease_until",
+          "fault_due_at", "fault_delay_seconds",
           "history", "observed", "plan", "delta", "verification", "report", "ai_usage", "error", "report_engine", "diagnosis_attempts", "dialogue", "containment_evidence")
 
 
@@ -119,8 +121,10 @@ def start(rt, event):
         ExpressionAttributeValues={":one": 1, ":max": 300})
     run = "run-" + uuid.uuid4().hex
     env = baseline()
+    delay = 120 + secrets.randbelow(181)
     state = dict(run_id=run, scenario=scenario, phase="NORMAL", revision=0, started_at=now,
         updated_at=now, lease_until=min(now + 900, rt.DEADLINE),
+        fault_due_at=now + delay, fault_delay_seconds=delay,
         history=[dict(phase="NORMAL", at=now, revision=0)], baseline_digest=digest(env),
         ai_usage=[], repair_capability="ISSUED")
     append_dialogue(state)
@@ -229,6 +233,10 @@ def advance(rt, event):
             return public(transition(rt, run, before, state, "BLOCKED", {"error": "AGENT_OPERATION_TIMED_OUT"}))
         return public(state)
     if phase == "NORMAL":
+        # Persisted server time is authoritative. Reloads, retries and reduced
+        # motion cannot shorten the randomly selected monitoring window.
+        if utc_now() < state.get("fault_due_at", 0):
+            return public(state)
         old = rt.get(run, "WORKLOAD")
         env = rt.payload(run, "WORKLOAD")
         changed = inject(env, state["scenario"])
