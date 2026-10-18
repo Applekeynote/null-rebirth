@@ -20,7 +20,7 @@ function monitorControls(t){
  $('confirm').hidden=!valid;$('review').hidden=!(ready&&!valid);
  $('start-monitoring').disabled=busy||activeMonitor(t)||!catalog.length;$('scenario').disabled=busy||activeMonitor(t);
  
- $('monitor-status').textContent=({WAITING:'Monitoring · random fault in 2–5 minutes',DIAGNOSING:'Fault detected · PATCH is diagnosing',REPAIR_READY:'Plan ready · awaiting your approval',COMPLETE:'Recovery verified · LOG report delivered',BLOCKED:'Safety gate closed',FAILED:m.error,CANCELLED:'Monitoring cancelled'})[m.status]||'Random fault window · 2–5 minutes';
+ $('monitor-status').textContent=({WAITING:'Monitoring · random fault in 2–5 minutes',DIAGNOSING:'Fault detected · PATCH is diagnosing',REPAIR_READY:'Plan ready · awaiting your approval',REPAIRING:t.run?.phase==='VERIFYING'?'Independent verification in progress':'PATCH is applying the approved repair',COMPLETE:'Recovery verified · LOG report delivered',BLOCKED:'Safety gate closed',FAILED:m.error,CANCELLED:'Monitoring cancelled'})[m.status]||'Random fault window · 2–5 minutes';
  const elapsed=m.started_at?Math.max(0,Math.floor((m.finished_at||(['COMPLETE','BLOCKED'].includes(m.status)?Math.max(0,...(t.run?.dialogue||[]).map(x=>x.at))||Date.now()/1000:Date.now()/1000))-m.started_at)):0;
  $('monitor-elapsed').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
  $('experiment-form').classList.toggle('monitoring',waiting);$('experiment-form').classList.toggle('attention',ready||m.status==='DIAGNOSING');

@@ -182,7 +182,16 @@ async def chat(request):
         tool,args=intent(message)
         async with ctx['lock']:
             args=conversation_arguments(ctx,tool,args)
-            data=await call_tool(tool,args)
+            if tool=='confirm_recovery' and ctx['monitor']:ctx['monitor']['status']='REPAIRING'
+            try:data=await call_tool(tool,args)
+            except Exception:
+                if tool=='confirm_recovery' and ctx['monitor']:
+                    # Leave an expired/rejected proposal reviewable; never keep
+                    # a phantom repairing state after a failed confirmation.
+                    current=await asyncio.to_thread(lab.state,ctx['run_id'])
+                    ctx['cached']=summary(current,lab.mode)
+                    ctx['monitor']['status']=current['phase']
+                raise
             if tool=='prepare_recovery':ctx['pending']=data
             if tool=='start_incident_lab':ctx['pending']=None;ctx['run_id']=data['run_id']
             if tool=='confirm_recovery':

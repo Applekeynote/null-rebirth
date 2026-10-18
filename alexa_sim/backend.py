@@ -81,6 +81,7 @@ class Lab:
             if state['phase']!='REPAIR_READY' or state['revision']!=permit['revision'] or digest!=permit['plan']:raise ValueError('Proposal or run revision changed. Prepare it again.')
             for _ in range(6):
                 if state['phase'] in {'COMPLETE','BLOCKED'}:break
+                if state.get('fault_due_at') and state['phase'] in {'REPAIRING','VERIFYING'}:time.sleep(2)
                 state=self.step(state)
             if state['phase'] not in {'COMPLETE','BLOCKED'}:raise ValueError('Workflow did not reach a terminal state.')
             return state

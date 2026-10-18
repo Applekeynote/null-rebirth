@@ -1,0 +1,150 @@
+{
+  "passed": true,
+  "source": "Recorded PV run after confirmation-progress fix",
+  "result": {
+    "run_id": "run-e28a82bc77ff4cb3afcd0f5a2e184393",
+    "scenario": "sourcenext-api",
+    "phase": "COMPLETE",
+    "revision": 9,
+    "mode": "AWS LIVE LAB",
+    "checks_passed": 25,
+    "checks_total": 25,
+    "plan": {
+      "diagnosis": "Unauthorized reads are bypassing scoped authentication.",
+      "reason": "Re-test unauthorized reads after enforcing scoped lab API principal.",
+      "runbook": "ENFORCE_MEMBER_API_SCOPE"
+    },
+    "verification": {
+      "checks_passed": 25,
+      "checks_total": 25,
+      "containment": {
+        "attempted": 3,
+        "denied": 3,
+        "legitimate_read": true
+      },
+      "environment_digest": "sha256:fee11bed42b480f1df6e7ee612ed3c0edd66d1b8c0b786decf3e9380b9cfa40b",
+      "evidence_preserved": true,
+      "healthy": true,
+      "independent": true,
+      "kms_signature_verified": true,
+      "verified_at": 1792311662
+    },
+    "dialogue": [
+      {
+        "at": 1792311423,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "PATCH",
+        "text": "The baseline is clean. I am ready to watch the isolated workload."
+      },
+      {
+        "at": 1792311423,
+        "phase": "NORMAL",
+        "revision": 0,
+        "speaker": "LOG",
+        "text": "I am recording the evidence and operator decisions. I will report success after independent verification."
+      },
+      {
+        "at": 1792311600,
+        "phase": "ANOMALY",
+        "revision": 1,
+        "speaker": "PATCH",
+        "text": "I detected unauthorized synthetic reads. I am preserving the evidence."
+      },
+      {
+        "at": 1792311607,
+        "phase": "WARNING",
+        "revision": 2,
+        "speaker": "PATCH",
+        "text": "The evidence is preserved. I will choose a scoped containment action."
+      },
+      {
+        "at": 1792311611,
+        "phase": "DIAGNOSING",
+        "revision": 3,
+        "speaker": "PATCH",
+        "text": "I am asking Amazon Nova to select an approved containment runbook."
+      },
+      {
+        "at": 1792311613,
+        "phase": "REPAIR_READY",
+        "revision": 4,
+        "speaker": "PATCH",
+        "text": "Unauthorized reads are bypassing scoped authentication. Re-test unauthorized reads after enforcing scoped lab API principal."
+      },
+      {
+        "at": 1792311648,
+        "phase": "REPAIRING",
+        "revision": 5,
+        "speaker": "PATCH",
+        "text": "I applied the containment policy. The verifier will now replay unauthorized requests."
+      },
+      {
+        "at": 1792311653,
+        "phase": "VERIFYING",
+        "revision": 6,
+        "speaker": "PATCH",
+        "text": "The verifier is testing blocked access, legitimate reads, and evidence integrity."
+      },
+      {
+        "at": 1792311662,
+        "phase": "NORMALIZED",
+        "revision": 7,
+        "speaker": "PATCH",
+        "text": "Containment verified: all 25 checks passed. Previously leaked data is not recovered."
+      },
+      {
+        "at": 1792311664,
+        "phase": "REPORTING",
+        "revision": 8,
+        "speaker": "LOG",
+        "text": "I am composing the verified containment record."
+      },
+      {
+        "speaker": "LOG",
+        "text": "PATCH performed the ENFORCE_MEMBER_API_SCOPE repair, and I recorded the verified result. Unauthorized lab access was blocked in this disposable lab with 25 passing checks.",
+        "phase": "COMPLETE",
+        "at": 1792311665,
+        "revision": 9
+      }
+    ],
+    "report": "PATCH performed the ENFORCE_MEMBER_API_SCOPE repair, and I recorded the verified result. Unauthorized lab access was blocked in this disposable lab with 25 passing checks.",
+    "ai_usage": [
+      {
+        "inputTokens": 930,
+        "model": "amazon.nova-micro-v1:0",
+        "outputTokens": 49,
+        "totalTokens": 979
+      },
+      {
+        "model": "amazon.nova-micro-v1:0",
+        "inputTokens": 287,
+        "outputTokens": 39,
+        "totalTokens": 326
+      }
+    ],
+    "started_at": 1792311423,
+    "fault_due_at": 1792311596,
+    "fault_delay_seconds": 173,
+    "monitor": {
+      "status": "COMPLETE",
+      "started_at": 1792311423,
+      "fault_due_at": 1792311596,
+      "finished_at": 1792311664.8233814,
+      "awaiting_confirmation": false,
+      "confirmation_expires_at": null
+    }
+  },
+  "captured_phases": [
+    "NORMAL",
+    "ANOMALY",
+    "WARNING",
+    "REPAIR_READY",
+    "REPAIRING",
+    "VERIFYING",
+    "NORMALIZED",
+    "REPORTING",
+    "COMPLETE"
+  ],
+  "random_delay_seconds": 173
+}

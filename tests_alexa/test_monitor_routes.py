@@ -35,3 +35,29 @@ async def test_waiting_poll_uses_cached_baseline_without_aws_calls(monkeypatch):
     response=await server.state(Request(query={'thread_id':'e'*32}))
     assert response.status_code==200 and json.loads(response.body)['monitor']['status']=='WAITING'
     server.conversations.clear()
+
+@pytest.mark.anyio
+@pytest.mark.parametrize('rejected',[False,True])
+async def test_confirmation_exposes_progress_and_restores_rejected_review(monkeypatch,rejected):
+    server.conversations.clear();ctx=server.conversation_context('f'*32)
+    rid=ctx['run_id'];entered=asyncio.Event();release=asyncio.Event()
+    ctx.update(pending={'state':{'run_id':rid},'confirmation_id':'one-use'},monitor={'status':'REPAIR_READY'},cached={'phase':'REPAIR_READY'})
+    current={'run_id':rid,'scenario':'sourcenext-api','phase':'REPAIRING','revision':5}
+    monkeypatch.setattr(server.lab,'state',lambda *args:dict(current))
+    async def tool(name,args):
+        assert ctx['monitor']['status']=='REPAIRING'
+        entered.set();await release.wait()
+        if rejected:
+            current['phase']='REPAIR_READY'
+            raise ValueError('Expired confirmation')
+        return {**current,'phase':'COMPLETE'}
+    monkeypatch.setattr(server,'call_tool',tool)
+    task=asyncio.create_task(server.chat(Request({'thread_id':'f'*32,'message':'Confirm the repair'})))
+    await entered.wait()
+    response=await server.state(Request(query={'thread_id':'f'*32}))
+    assert json.loads(response.body)['phase']=='REPAIRING'
+    release.set();result=await task
+    assert result.status_code==(400 if rejected else 200)
+    assert ctx['monitor']['status']==('REPAIR_READY' if rejected else 'COMPLETE')
+    assert ctx['pending'] is None
+    server.conversations.clear()

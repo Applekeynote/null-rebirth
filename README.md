@@ -94,7 +94,7 @@ python tools/verify_containment_evidence.py C:/private/CONTAINMENT_VALIDATION.js
 python alexa_sim/verify_interop.py
 ```
 
-- **176 local tests passed (October 18):** fault deadline boundaries, early/repeated requests, scheduler cancellation, failed diagnosis, backend safety gates and conversation boundaries.
+- **178 local tests passed (October 18):** fault deadline boundaries, early/repeated requests, scheduler cancellation, failed diagnosis, backend safety gates and conversation boundaries.
 - **Six AWS acceptance cases:** five containment cases and one recovery regression, 25 functional checks each. Six exported signatures verified offline; all six altered payloads were rejected.
 - **One additional MCP-to-AWS run:** 25/25 checks, three unauthorized requests denied, legitimate reads and evidence preserved, KMS signature verified. Two model calls. Its KMS result is the backend verification flag; a separate offline signature export was not collected for this additional run.
 - **MCP interop:** official SDK client, explicit 2025-11-25 negotiation, seven tools, invalid case rejected, unconfirmed repair rejected and untrusted Origin rejected.
